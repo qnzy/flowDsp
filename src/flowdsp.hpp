@@ -38,16 +38,12 @@ class dspnode {
         // the cachedData. inRead is used to break loops with stateful
         // nodes.
         Tflow read(int tick, int port = 0) {
-            if (inRead) {
-                process(tick);
-            }
-            else {
+            if (!inRead) {
                 inRead = true;
                 if (tick != lastTick) {
                     process(tick);
                     lastTick = tick;
                 }
-                update(tick);
                 inRead = false;
             }
             return outputs[port];
@@ -67,12 +63,8 @@ class dspnode {
         Tflow cachedData;
         int lastTick;
         bool inRead;
-        // virtual functions. process calculates output for given tick,
-        // update is used to update the state of the node. if the node
-        // can be used in a loop (eg delay) only update should read the
-        // inputs. reset can be used to reset the state.
+        // determines the next output value
         virtual void process(int tick) = 0;
-        virtual void update(int tick) {}
         virtual void reset() {}
 };
 
@@ -157,8 +149,7 @@ class delay : public dspnode {
             dspnode(1,1), 
             dlyIndex(0),
             dly(numDelay, 0.0) {}
-        void process(int tick) {outputs.at(0) = dly.at(dlyIndex%dly.size());}
-        void update(int tick) {dly.at((dlyIndex++)%dly.size())=getInput(0,tick);}
+        void process(int tick) {dly.at((dlyIndex++)%dly.size())=getInput(0,tick);outputs.at(0) = dly.at(dlyIndex%dly.size());}
 };
 
 /************************************************
