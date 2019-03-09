@@ -8,9 +8,8 @@ TEST_CASE("constant source") {
     CHECK(csrc.read(0) == Approx(3.0));
 }
 
-Tflow get2() { return 2.0; }
 TEST_CASE("sum of constant and callback sources") {
-    callbackSrc cs1(get2);
+    callbackSrc cs1([](){return (Tflow) 2.0;});
     constSrc cs2(3.0);
     sum s(2);
     s.bind(0, &cs1, 0);
